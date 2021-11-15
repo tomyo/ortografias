@@ -1,0 +1,109 @@
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<template id='rule'>
+    <tr>
+        <td><input name="from"></td>
+        <td><input name="to"></td>
+    </tr>
+</template>
+
+<form id="rules">
+    <fieldset>
+        <legend>Reglas</legend>
+        <table>
+            <thead>
+                <tr>
+                    <th>Reemplaza esto</th>
+                    <th>Por esto</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><input name="from" value="qu([eiéí])"></td>
+                    <td><input name="to" value="k$1"></td>
+                </tr>
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td>
+                        <button type="button">+</button>
+                    </td>
+                </tr>
+            </tfoot>
+        </table>
+        <small>✔ regex soportado <a href="https://regex101.com/" target=+_blank> (ECMAScript)</a></small>
+    </fieldset>
+</form>
+
+<form id="convert">
+    <fieldset>
+        <legend>
+            Texto a convertir
+        </legend>
+        <label>
+            <textarea id="text-in" autofocus rows="8">Incerta aquí texto de prueva a convertir (o usa este).</textarea>
+        </label>
+
+    </fieldset>
+    <fieldset>
+        <legend>
+            Resultado:
+        </legend>
+        <label>
+            <output for="text-in"></output>
+        </label>
+    </fieldset>
+</form>
+
+<style>
+    input,
+    textarea,
+    output {
+        width: 100%;
+        white-space: pre-wrap;
+    }
+
+    body {
+        max-width: 60ch;
+        margin-inline: auto;
+    }
+</style>
+
+<script>
+    const textArea = document.querySelector("#convert textarea");
+    const tableBody = document.querySelector("#rules tbody");
+
+    function convert(input, rules) {
+        let result = input;
+        for (const [from, to] of rules) {
+            const regExpFrom = new RegExp(from.value, 'g');
+            result = result.replaceAll(regExpFrom, to.value);
+        }
+        return result;
+    }
+
+    function update(event) {
+        
+        const output = document.querySelector("#convert output");
+        const tableRows = tableBody.querySelectorAll("tr");
+        const fromToRules = [... tableRows].map((e) => e.querySelectorAll('input'));
+        output.value = convert(textArea.value, fromToRules);
+        return output.value
+    }
+
+    tableBody.addEventListener('change', update);
+    tableBody.addEventListener('keyup', update);
+    textArea.addEventListener('keyup', update);
+    update();
+
+
+
+    // + button functionality
+    function addRow(event) {
+        template = document.querySelector('template#rule');
+        const result = tableBody.appendChild(template.content.firstElementChild.cloneNode(true))
+    }
+
+    document.querySelector("tfoot button").addEventListener("click", addRow);
+    
+</script>
